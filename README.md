@@ -75,8 +75,15 @@ index, so every evaluation sees the same validation set.
 
 One checkpoint per model of the paper, the first of the three seeds (8 files, ~0.45 GB), named
 `<dataset>_<arm>_s1.pth` with `<dataset>` in `cmnist, imagenet, ade20k, coco_stuff` and `<arm>` in `random` (trained
-with random fixation locations) or `learned` (trained with its own policy). Download: CHECKPOINT_LINK, into
-`./checkpoints`. `imagenet_random_s1.pth` is also the initialisation of the segmentation models.
+with random fixation locations) or `learned` (trained with its own policy). They are hosted on GRO.data,
+[doi:10.25625/UXZTPA](https://doi.org/10.25625/UXZTPA). Download them into `./checkpoints` (MD5-checked) with
+
+```bash
+python -m foavis.io.download                                   # all 8
+python -m foavis.io.download --models cmnist_learned_s1         # or a subset
+```
+
+`imagenet_random_s1.pth` is also the initialisation of the segmentation models.
 
 ## Quickstart
 
