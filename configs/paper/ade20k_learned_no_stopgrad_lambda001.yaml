@@ -1,0 +1,24 @@
+# ADE20K, learned policy without stop-gradient, policy-loss weight lambda = 0.01 instead of 0.1 (single run).
+# Paper: the lambda = 0.01 run of the stop-gradient appendix (training curves and entropy figure).
+# Identical to ade20k_learned.yaml except: policy_loss.stop_grad: false and policy_loss.weight: 0.01.
+# Hardware of the reported runs: 1 GPU, batch 16.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/ade20k_learned_no_stopgrad_lambda001.yaml --data_dir <data_dir> --seed <seed> \
+#       --pretrained_model_path model_ckpts/imagenet/<imagenet_random_phase2 run, first seed>/last.pth
+# Seed of the reported run: 2013147171
+
+model:
+  policy_loss:
+    stop_grad: false
+    weight: 0.01
+training:
+  dataset_name: ade20k_semantic_seg
+  optimizer:
+    lr: 0.0002
+    flat_epochs: 250
+    step_size_epochs: 50
+  clip_grad_norm: 50.0
+dataloader:
+  batch_size: 16

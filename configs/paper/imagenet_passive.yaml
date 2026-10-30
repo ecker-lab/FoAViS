@@ -1,0 +1,25 @@
+# ImageNet, passive baseline: Res-UNet backbone and classification head on the whole image at 128 x 128
+# (150 epochs in one run, from scratch; the learning rate is halved at the epochs of the active model's phase 2).
+# No checkpoint is released; train it with this config. Its last.pth initialises the segmentation baselines.
+# Paper: Table 2 (passive baseline), ImageNet; Appendix "Passive baseline".
+# Hardware of the reported run: 4 GPUs, batch 16 per GPU (64 in total).
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_passive.yaml --data_dir <data_dir> \
+#       --seed <seed>
+# Single reported run. Differs from the active models in AdamW beta1 (0.9) and no gradient clipping.
+
+model:
+  passive_input_size: 128
+  policy_loss:
+    enabled: false
+training:
+  num_epochs: 150
+  optimizer:
+    betas: [0.9, 0.999]
+    flat_epochs: 76
+    step_size_epochs: 13
+  clip_grad_norm: 0.0
+dataloader:
+  batch_size: 16

@@ -1,0 +1,22 @@
+# ADE20K, learned policy without stop-gradient.
+# Paper: "w/o stop-grad" row of the stop-gradient ablation table and its figures.
+# Identical to ade20k_learned.yaml except: policy_loss.stop_grad: false (the policy gradient also reaches backbone and memory).
+# Hardware of the reported runs: 1 GPU, batch 16.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/ade20k_learned_no_stopgrad.yaml --data_dir <data_dir> --seed <seed> \
+#       --pretrained_model_path model_ckpts/imagenet/<imagenet_random_phase2 run, first seed>/last.pth
+# Seeds of the reported runs: 1888552220, 575316560, 63500606
+
+model:
+  policy_loss:
+    stop_grad: false
+training:
+  dataset_name: ade20k_semantic_seg
+  optimizer:
+    lr: 0.0002
+    flat_epochs: 250
+    step_size_epochs: 50
+dataloader:
+  batch_size: 16

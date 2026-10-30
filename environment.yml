@@ -1,0 +1,23 @@
+# Conda environment for training and evaluating the models of the paper.
+#   conda env create -f environment.yml && conda activate foavis && pip install -e .
+# Versions are the ones the reported runs used (CUDA 12.1 build of PyTorch 2.3.0).
+name: foavis
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pytorch=2.3.0
+  - torchvision=0.18.0
+  - pytorch-cuda=12.1
+  - numpy=1.26
+  - pyarrow=19.0
+  - pyyaml
+  - pillow=10.4
+  - tqdm
+  - pytest
+  - pip
+  - pip:
+      - dotmap==1.3.30
+      - wandb==0.25.0   # only used with --use_wandb true

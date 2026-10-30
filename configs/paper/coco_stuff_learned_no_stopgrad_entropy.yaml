@@ -1,0 +1,24 @@
+# COCO-Stuff, learned policy without stop-gradient, entropy target 3.5 nats.
+# Paper: "w/o stop-grad + entropy" row of the stop-gradient ablation table.
+# Identical to coco_stuff_learned.yaml except: policy_loss.stop_grad: false and policy_loss.entropy_target: 3.5 (adaptive entropy weight).
+# Hardware of the reported runs: 1 GPU, batch 16.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/coco_stuff_learned_no_stopgrad_entropy.yaml --data_dir <data_dir> --seed <seed> \
+#       --pretrained_model_path model_ckpts/imagenet/<imagenet_random_phase2 run, first seed>/last.pth
+# Seed of the reported run: 1099636436
+
+model:
+  policy_loss:
+    stop_grad: false
+    entropy_target: 3.5
+training:
+  dataset_name: coco_stuff
+  num_epochs: 72
+  optimizer:
+    lr: 0.0002
+    flat_epochs: 36
+    step_size_epochs: 8
+dataloader:
+  batch_size: 16

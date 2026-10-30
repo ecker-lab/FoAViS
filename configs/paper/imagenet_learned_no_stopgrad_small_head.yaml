@@ -1,0 +1,22 @@
+# ImageNet, learned policy without stop-gradient, 129-parameter policy head (75 epochs at constant learning rate, like phase 1 of the main model).
+# Paper: "w/o stop-grad + small head" row of the stop-gradient ablation table.
+# Identical to imagenet_learned_phase1.yaml except: policy_loss.stop_grad: false and policy_head.channels: 0 (a single 1x1 convolution).
+# Hardware of the reported runs: 4 GPUs, batch 16 per GPU (64 in total).
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned_no_stopgrad_small_head.yaml --data_dir <data_dir> --seed <seed>
+# Seed of the reported run: 794237725
+
+model:
+  policy_head:
+    channels: 0
+  policy_loss:
+    stop_grad: false
+training:
+  num_epochs: 75
+  optimizer:
+    flat_epochs: 75
+  clip_grad_norm: 50.0
+dataloader:
+  batch_size: 16

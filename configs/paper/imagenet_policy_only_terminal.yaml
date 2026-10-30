@@ -1,0 +1,31 @@
+# ImageNet, policy head only, terminal reward (-CE_T, broadcast to every step): the policy head is trained for 24 short epochs (2000 steps each) on the
+# frozen ImageNet random-location model; nothing else is updated.
+# Paper: reward-horizon table (terminal / per-step columns); the frozen model is the receiving model of that table.
+# Identical to imagenet_learned_phase2.yaml except: train_policy_head_only: true, policy_loss.reward: terminal, running-mean baseline, 1-layer policy head, batch 64 on 1 GPU,
+# 24 epochs of 2000 steps, initialised from the random-location model.
+# Hardware of the reported runs: 1 GPU, batch 64.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/imagenet_policy_only_terminal.yaml --data_dir <data_dir> --seed <seed> \
+#       --pretrained_model_path model_ckpts/imagenet/<imagenet_random_phase2 run, first seed>/last.pth
+# Seed of the reported run: 1566662013
+
+model:
+  train_policy_head_only: true
+  policy_head:
+    layers: 1
+  policy_loss:
+    weight: 1.0
+    reward: terminal
+    reward_standardization: abs_mean
+    baseline: running_mean
+training:
+  num_epochs: 24
+  optimizer:
+    flat_epochs: 8
+    step_size_epochs: 4
+    warmup_steps: 0
+  use_compile: false
+utils:
+  max_train_steps_per_epoch: 2000

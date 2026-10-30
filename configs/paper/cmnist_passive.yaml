@@ -1,0 +1,22 @@
+# C-MNIST, passive baseline: Res-UNet backbone and classification head on the whole image at 128 x 128
+# (400 epochs, from scratch). No checkpoint is released; train it with this config.
+# Paper: Table 2 (passive baseline), C-MNIST; Appendix "Passive baseline".
+# Hardware of the reported run: 1 GPU, batch 64.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/cmnist_passive.yaml --data_dir <data_dir> --seed <seed>
+# Single reported run. Differs from the active models in AdamW beta1 (0.9) and no gradient clipping.
+
+model:
+  passive_input_size: 128
+  policy_loss:
+    enabled: false
+training:
+  dataset_name: random_cluttered_MNIST
+  num_epochs: 400
+  optimizer:
+    betas: [0.9, 0.999]
+    flat_epochs: 200
+    step_size_epochs: 33
+  clip_grad_norm: 0.0

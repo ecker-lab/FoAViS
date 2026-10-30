@@ -1,0 +1,81 @@
+# Defaults for every run. A run config (configs/paper/*.yaml) and command-line flags override them:
+# --<key> <value> for a key whose name is unique, otherwise --<section>.<key> <value> (e.g. --memory.channels 128).
+# Values are parsed as YAML (true, 0.1, [1, 2], null). A key that is not listed here is an error.
+
+model:
+  num_glimpses: 4                      # T, steps of the loop (glimpses per image)
+  policy: learned                      # where the next fixation comes from: learned (the policy head) | random
+                                       # (uniform) | triangle | quadrant (fixed sequences) | saliency | entropy (map
+                                       # heuristics for classification / segmentation models); see Table 3
+  policy_argmax: false                 # learned policy: take the most likely cell instead of sampling
+                                       # (evaluation sets it to true unless it is given)
+  ior_radius: 0.0                      # saliency/entropy: > 0 excludes this radius around earlier fixations
+                                       # (inhibition of return, in [-1, 1] image units; Table 3 uses 0.5)
+  train_policy_head_only: false        # freeze everything except the policy head (policy-only models)
+  passive_input_size: 0                # > 0: passive baseline instead of FoAViS: backbone and task head on the
+                                       # whole image resized to this size (Table 2 uses 128); no foveation,
+                                       # memory or policy (needs policy_loss.enabled: false)
+
+  foveation:                           # Sec. 3.1, log-polar glimpse of A x R samples
+    angular_bins: 64                   # A, samples along the angle
+    radius_bins: 64                    # R, samples along the log-radius
+  backbone:                            # Sec. 3.2, Res-UNet on the glimpse
+    channels: 64                       # C, channels of the first encoder stage (C, 2C, 4C, 8C over four stages)
+    blocks_per_stage: 2                # residual blocks per encoder stage
+    decoder_channels: 128              # D, width of the decoder and of the features written to the memory
+  memory:                              # Sec. 3.3
+    channels: 128                      # channels of the memory features H_t
+    kernel_size: 1                     # convolution of the recurrent update; 1: an LSTM cell per grid position
+    grid_size: 64                      # G, the memory is a G x G grid over the image
+  policy_head:                         # Sec. 3.4
+    channels: 128                      # width of the 3x3 convolutions; 0: a single 1x1 convolution (small head)
+    layers: 3                          # number of 3x3 convolutions before the final 1x1 convolution
+  policy_loss:                         # Sec. 3.6
+    enabled: true                      # train the policy head; false for the random-location models
+    stop_grad: true                    # policy gradient reaches only the policy head (Eq. 8)
+    weight: 0.1                        # factor on the policy loss in the total objective
+    reward: difference                 # difference: CE_t - CE_{t+1} (Eq. 6) | terminal: -CE_T for every step
+    reward_standardization: per_step   # per_step: over the batch at each step (Eq. 7) | abs_mean: divide by mean |r|
+    baseline: none                     # none | running_mean: subtract a moving average of the rewards
+    entropy_target: 0.0                # > 0: entropy bonus whose weight is adapted toward this policy entropy (nats)
+
+training:
+  dataset_name: imagenet               # random_cluttered_MNIST (C-MNIST) | imagenet | ade20k_semantic_seg | coco_stuff;
+                                       # sets the task (classification or semantic segmentation)
+  just_evaluate: false                 # evaluate pretrained_model_path on the validation set, no training
+  eval_passes: 1                       # evaluation: passes over the validation set, the last one is reported
+  num_epochs: 500
+  validation_interval: 2               # validate (and save checkpoints) every this many epochs
+  pretrained_model_path: null          # checkpoint to initialise the model from (weights only)
+  restore_optimizer: false             # with pretrained_model_path: also load its optimizer state (ImageNet phase 2)
+  resume_training: false               # with pretrained_model_path: continue that run (optimizer, schedule, epoch)
+  keep_last_n_checkpoints: 3           # last-epoch checkpoints kept per run (plus the best one)
+
+  optimizer:                           # AdamW; learning rate held for flat_epochs, then halved every step_size_epochs
+    lr: 0.0001                         # learning rate
+    weight_decay: 0.01
+    betas: [0.99, 0.999]               # AdamW moment decay rates
+    eps: 0.00000001                    # AdamW epsilon
+    flat_epochs: 23                    # epochs at the full learning rate
+    step_size_epochs: 15               # then the learning rate is halved every this many epochs
+    warmup_steps: 2000                 # linear warm-up over this many steps (not when resuming)
+  clip_grad_norm: 20.0                 # clip the gradient norm to this value; <= 0 disables
+  use_compile: true                    # torch.compile the backbone and the memory module (faster after a few minutes)
+  use_amp: true                        # classification: bf16 autocast on GPUs that support it (segmentation: fp32)
+
+utils:
+  seed: null                           # null: a new seed per run, saved in the run's config.yaml
+  use_wandb: false                     # log metrics to Weights & Biases instead of only the console
+  wandb_project_name: foavis
+  use_test_mode: false                 # debugging: anomaly detection, at most 100 batches per epoch
+  max_train_steps_per_epoch: 0         # > 0: end each training epoch after this many steps
+  save_scanpaths: null                 # evaluation: a directory to record the fixations to (scanpaths.parquet)
+  replay_scanpaths: null               # evaluation: replay recorded fixations instead of the policy
+                                       # (a scanpaths.parquet or its directory)
+
+dataset:
+  data_dir: ./data                     # root of all datasets, see README "Data"
+
+dataloader:
+  batch_size: 64                       # per GPU; the total batch is batch_size x number of GPUs
+  num_workers: 16                      # data-loading processes per GPU

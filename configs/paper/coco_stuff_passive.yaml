@@ -1,0 +1,27 @@
+# COCO-Stuff semantic segmentation, passive baseline: Res-UNet backbone and segmentation head on the whole image at
+# 128 x 128 (72 epochs). Backbone (encoder and decoder) initialised from the ImageNet passive baseline, the
+# segmentation head from scratch. No checkpoint is released; train it with this config.
+# Paper: Table 2 (passive baseline), COCO-Stuff; Appendix "Passive baseline".
+# Hardware of the reported run: 1 GPU, batch 16.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/coco_stuff_passive.yaml --data_dir <data_dir> --seed <seed> \
+#       --pretrained_model_path model_ckpts/imagenet/<imagenet_passive run>/last.pth
+# Single reported run. Differs from the active models in AdamW beta1 (0.9) and no gradient clipping.
+
+model:
+  passive_input_size: 128
+  policy_loss:
+    enabled: false
+training:
+  dataset_name: coco_stuff
+  num_epochs: 72
+  optimizer:
+    lr: 0.0002
+    betas: [0.9, 0.999]
+    flat_epochs: 36
+    step_size_epochs: 8
+  clip_grad_norm: 0.0
+dataloader:
+  batch_size: 16

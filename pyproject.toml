@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "foavis"
+version = "1.0.0"
+description = "Foveated active vision with a 2D spatial memory and a concurrently trained fixation policy"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[tool.setuptools.packages.find]
+include = ["foavis*"]

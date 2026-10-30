@@ -1,0 +1,19 @@
+# ADE20K semantic segmentation, learned policy (stop-gradient on the memory, 500 epochs), initialised from the
+# ImageNet random-location model.
+# Paper: Table 2 and Table 3 (learned-policy model), ADE20K.
+# Hardware of the reported runs: 1 GPU, batch 16.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/ade20k_learned.yaml --data_dir <data_dir> --seed <seed> \
+#       --pretrained_model_path model_ckpts/imagenet/<imagenet_random_phase2 run, first seed>/last.pth
+# Seeds of the three reported runs: 1528453099, 731821501, 982850809
+
+training:
+  dataset_name: ade20k_semantic_seg
+  optimizer:
+    lr: 0.0002
+    flat_epochs: 250
+    step_size_epochs: 50
+dataloader:
+  batch_size: 16

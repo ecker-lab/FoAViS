@@ -1,0 +1,16 @@
+# ImageNet, learned policy (stop-gradient on the memory), phase 1 of 2: from scratch, constant learning rate (75 epochs).
+# Paper: initialisation of imagenet_learned_phase2; also the "with stop-grad" ImageNet model of the stop-gradient
+# ablation (first seed).
+# Hardware of the reported runs: 4 GPUs, batch 16 per GPU (64 in total).
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned_phase1.yaml --data_dir <data_dir> --seed <seed>
+# Seeds of the three reported runs: 539356603, 1881411391, 116909500
+
+training:
+  num_epochs: 75
+  optimizer:
+    flat_epochs: 75
+dataloader:
+  batch_size: 16

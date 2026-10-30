@@ -1,0 +1,19 @@
+# C-MNIST, learned policy without stop-gradient.
+# Paper: "w/o stop-grad" row of the stop-gradient ablation table and its figures.
+# Identical to cmnist_learned.yaml except: policy_loss.stop_grad: false (the policy gradient also reaches backbone and memory).
+# Hardware of the reported runs: 1 GPU, batch 64.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/cmnist_learned_no_stopgrad.yaml --data_dir <data_dir> --seed <seed>
+# Seeds of the reported runs: 894386860, 840722996, 1323436437
+
+model:
+  policy_loss:
+    stop_grad: false
+training:
+  dataset_name: random_cluttered_MNIST
+  num_epochs: 400
+  optimizer:
+    flat_epochs: 200
+    step_size_epochs: 33

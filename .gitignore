@@ -1,0 +1,11 @@
+__pycache__/
+*.egg-info/
+/data/
+/model_ckpts/
+/scanpaths/
+/wandb_runs/
+/plots/
+CLAUDE.md
+.claude/
+/checkpoints/
+/reproduce_out/

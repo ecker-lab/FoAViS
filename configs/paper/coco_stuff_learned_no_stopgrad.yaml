@@ -1,0 +1,23 @@
+# COCO-Stuff, learned policy without stop-gradient.
+# Paper: "w/o stop-grad" row of the stop-gradient ablation table and its figures.
+# Identical to coco_stuff_learned.yaml except: policy_loss.stop_grad: false (the policy gradient also reaches backbone and memory).
+# Hardware of the reported runs: 1 GPU, batch 16.
+#   python main.py ...                 single GPU
+#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+# Command:
+#   python main.py --config_path configs/paper/coco_stuff_learned_no_stopgrad.yaml --data_dir <data_dir> --seed <seed> \
+#       --pretrained_model_path model_ckpts/imagenet/<imagenet_random_phase2 run, first seed>/last.pth
+# Seeds of the reported runs: 1099636436, 830503644, 361499620
+
+model:
+  policy_loss:
+    stop_grad: false
+training:
+  dataset_name: coco_stuff
+  num_epochs: 72
+  optimizer:
+    lr: 0.0002
+    flat_epochs: 36
+    step_size_epochs: 8
+dataloader:
+  batch_size: 16
