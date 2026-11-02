@@ -74,7 +74,7 @@ utils:
                                        # (a scanpaths.parquet or its directory)
 
 dataset:
-  data_dir: ./data                     # root of all datasets, see README "Data"
+  data_dir: ./data                     # root of all datasets, see the README section "Data"
 
 dataloader:
   batch_size: 64                       # per GPU; the total batch is batch_size x number of GPUs

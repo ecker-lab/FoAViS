@@ -1,6 +1,6 @@
 # Notes for working on this code
 
-Code of the FoAViS paper (see `README.md` for the paper, installation, data and reproduction). This file is the
+Code of the FoAViS paper (see `README.md` for the paper, installation and data, and `docs/` for evaluation, training and the paper-to-code map). This file is the
 short orientation for anyone changing the code, people and AI coding assistants alike.
 
 ## Map
