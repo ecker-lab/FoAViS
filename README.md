@@ -1,7 +1,8 @@
 # FoAViS: Analyzing Learned Fixation Strategies in a Foveated Active Vision System
 
 Official code for the paper *FoAViS: Analyzing Learned Fixation Strategies in a Foveated Active Vision System*
-by Valentin Hassler, Jonathan Henrich, Yohaï-Eliel Berreby, Haoze Zhu and Alexander Ecker (under review at TMLR).
+by Valentin Hassler, Jonathan Henrich, Yohaï-Eliel Berreby, Haoze Zhu and Alexander Ecker (under review at TMLR):
+[arXiv:2610.41987](https://arxiv.org/abs/2610.41987).
 
 <p align="center"><img src="docs/architecture.png" width="760" alt="FoAViS unrolled over three glimpses"></p>
 
@@ -233,11 +234,14 @@ check a change.
 ## Citation
 
 ```bibtex
-@article{foavis,
-  title   = {{FoAViS}: Analyzing Learned Fixation Strategies in a Foveated Active Vision System},
-  author  = {Hassler, Valentin and Henrich, Jonathan and Berreby, Yoha{\"i}-Eliel and Zhu, Haoze and Ecker, Alexander},
-  journal = {Under review at Transactions on Machine Learning Research},
-  year    = {2026}
+@misc{foavis,
+  title         = {{FoAViS}: Analyzing Learned Fixation Strategies in a Foveated Active Vision System},
+  author        = {Hassler, Valentin and Henrich, Jonathan and Berreby, Yoha{\"i}-Eliel and Zhu, Haoze and Ecker, Alexander},
+  year          = {2026},
+  eprint        = {2610.41987},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2610.41987}
 }
 ```
 
