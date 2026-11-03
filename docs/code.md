@@ -1,7 +1,6 @@
 # Code guide
 
-This guide is for working with the code: where each part of the paper is implemented, how the repository is
-organized, and how to check a change.
+Where each part of the paper is implemented, how the repository is organized, and how to check a change.
 
 ## Paper and code
 

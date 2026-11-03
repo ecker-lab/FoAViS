@@ -18,42 +18,42 @@ aspects of empirical scanpath characteristics. Our work marks an important step 
 single-pass architectures, towards biologically grounded models of vision. It opens a path for studying goal-directed
 gaze behavior and information representation in the visual system.
 
-The paper is available on [arXiv](https://arxiv.org/abs/2610.41987) (under review at TMLR). The pre-trained models
-are available on [GRO.data](https://doi.org/10.25625/UXZTPA); this repository downloads them for you, see
-[Quickstart](#quickstart).
+The paper is on [arXiv](https://arxiv.org/abs/2610.41987) and under review at TMLR. The pre-trained models are on
+[GRO.data](https://doi.org/10.25625/UXZTPA), and the code downloads them when they are first needed (see
+[Quickstart](#quickstart)).
 
 <p align="center"><img src="docs/architecture.png" width="760" alt="FoAViS unrolled over three glimpses"></p>
 
-**Overview of FoAViS unrolled over three glimpses.** At each step, the current fixation serves as the center for a
-foveation module that extracts a log-polar glimpse (1) (sampling grid shown in white). The glimpse is encoded by the
-backbone (2) (feature map visualized via PCA), backprojected to Cartesian image space, and accumulated into a 2D
-spatial memory using a shared per-position LSTM (3) (memory state visualized via PCA). The memory state is then read
-out by the policy head (4) to produce a spatial probability map (logits visualized as a heatmap) from which the next
-fixation is drawn (purple number), while the task head (5) uses it to generate the task prediction.
+**FoAViS unrolled over three glimpses.** At each step, the foveation module samples a log-polar glimpse (1) centred
+on the current fixation; the white grid marks the sampling points. The backbone (2) encodes the glimpse, and its
+feature map is projected back to image coordinates and added to a 2D spatial memory by an LSTM shared across all
+positions (3). The policy head (4) turns the memory into a probability map, from which the next fixation (purple
+number) is drawn, and the task head (5) reads the same memory to make the prediction. Feature maps and memory states
+are shown with PCA, and the policy map as a heatmap of its logits.
 
 ## Demo
 
-To see where the pre-trained models look on example images or on your own, open the demo notebook, which runs on
-Google Colab without any setup:
+The demo notebook shows where the pre-trained models look, on two example images or on your own. It runs on Google
+Colab without any setup:
 
 <a target="_blank" href="https://colab.research.google.com/github/ecker-lab/FoAViS/blob/main/demo.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 ## Repository overview
 
-This repository contains the code to train and evaluate FoAViS on the four datasets of the paper (Cluttered MNIST,
-ImageNet, ADE20K and COCO-Stuff), together with the configurations of the paper's models, their pre-trained weights
-and scripts that reproduce the paper's main results. Depending on what you want to do:
+The repository has the code to train and evaluate FoAViS on the paper's four datasets (Cluttered MNIST, ImageNet,
+ADE20K and COCO-Stuff), a config for every model in the paper, the pre-trained weights, and scripts that reproduce the
+main results. Each use has its own guide:
 
-- **Run** a pre-trained model on your own images and look at its fixations: see the [demo notebook](demo.ipynb) or
+- To run a pre-trained model on your own images and look at its fixations, use the [demo notebook](demo.ipynb) or
   the [inference guide](docs/inference.md).
-- **Evaluate** the pre-trained models or your own, reproduce the paper's results, or record the fixations a model
-  makes: see the [evaluation guide](docs/evaluation.md).
-- **Train** a model, from scratch or starting from a pre-trained one: see the [training guide](docs/training.md).
-- **Understand or change the code**: the [code guide](docs/code.md) maps every part of the paper to the code and
-  explains how to run the tests.
+- To evaluate the pre-trained models or your own, reproduce the paper's results, or record the fixations a model
+  makes, see the [evaluation guide](docs/evaluation.md).
+- To train a model, from scratch or from a pre-trained one, see the [training guide](docs/training.md).
+- To find your way around the code, see the [code guide](docs/code.md). It maps each part of the paper to the code
+  and explains how to run the tests.
 
-Training and evaluating on the full datasets needs a GPU; running a model on single images also works on a CPU. The
-code has been tested on Linux.
+Training and evaluating on the full datasets needs a GPU, but running a model on a single image also works on a CPU.
+We have tested the code on Linux.
 
 ## Installation
 
@@ -71,11 +71,11 @@ The environment uses Python 3.11 and PyTorch 2.3.0 with CUDA 12.1, so your NVIDI
 
 All datasets live under one root directory, which you pass to every command as `--data_dir` (default `./data`).
 
-**Cluttered MNIST (C-MNIST) needs no preparation.** Its images are generated on the fly: each places one MNIST
-digit (the target) among five EMNIST letters (the distractors) on a 224 x 224 canvas. MNIST and EMNIST are downloaded
-automatically on first use.
+Cluttered MNIST (C-MNIST) needs no preparation. The code generates its images on the fly, each with one MNIST digit
+(the target) among five EMNIST letters (the distractors) on a 224 x 224 canvas, and downloads MNIST and EMNIST the
+first time they are used.
 
-**The other datasets have to be downloaded by you** from their official sources and arranged as below:
+You have to download the other datasets yourself from their official sources and arrange them as shown below:
 [ImageNet](https://image-net.org/download.php) (ILSVRC 2012), [ADE20K](http://sceneparsing.csail.mit.edu/)
 (ADEChallengeData2016), the [COCO 2017](https://cocodataset.org/#download) images and the
 [COCO-Stuff 164k](https://github.com/nightrome/cocostuff) label maps (stuffthingmaps). You only need the datasets you
@@ -96,8 +96,8 @@ want to use.
 
 ## Quickstart
 
-Run the pre-trained ImageNet model on an example image; it prints the fixations and the top-5 classes and saves a
-figure of where the model looked to `docs/examples/cat_foavis.png`:
+Run the pre-trained ImageNet model on an example image. It prints the fixations and the five most likely classes,
+and saves a figure of where the model looked to `docs/examples/cat_foavis.png`:
 
 ```bash
 python -m foavis.predict docs/examples/cat.jpg --model imagenet_learned_s1

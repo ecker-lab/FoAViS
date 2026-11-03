@@ -1,8 +1,8 @@
 # Evaluation
 
-This guide covers evaluating a FoAViS model on a validation set: one of our pre-trained models or one you trained
-yourself. It also explains how to reproduce the paper's main results and how to record the fixations a model makes.
-Set up the environment and the data first, as described in the [README](../README.md).
+How to evaluate a FoAViS model on a validation set, whether one of our pre-trained models or one you trained
+yourself, how to reproduce the paper's main results, and how to record the fixations a model makes. Set up the
+environment and the data first, as described in the [README](../README.md).
 
 - [Pre-trained models](#pre-trained-models)
 - [Evaluating a model](#evaluating-a-model)
@@ -11,9 +11,9 @@ Set up the environment and the data first, as described in the [README](../READM
 
 ## Pre-trained models
 
-For each dataset we release two models: one trained with its own **learned** fixation policy, and one trained with
-**random** fixation locations (the paper's comparison model). The paper trains every configuration with three seeds;
-the released models are the first seed. They are hosted on [GRO.data](https://doi.org/10.25625/UXZTPA) and named
+For each dataset we release two models. The `learned` model was trained with its own fixation policy, and the
+`random` model, which the paper compares it with, was trained with random fixation locations. The paper trains every
+configuration with three seeds, and the released models are the first seed. They are hosted on [GRO.data](https://doi.org/10.25625/UXZTPA) and named
 `<dataset>_<policy>_s1.pth`, with `<dataset>` one of `cmnist, imagenet, ade20k, coco_stuff` and `<policy>` one of
 `learned, random`.
 
@@ -24,27 +24,27 @@ python -m foavis.io.download                                     # all
 python -m foavis.io.download --models imagenet_learned_s1        # a subset
 ```
 
-Each file is checked against its MD5 after the download. The scripts in `reproduce/` download any missing
-checkpoint by themselves.
+The download checks each file against its MD5. The scripts in `reproduce/` download missing checkpoints by
+themselves.
 
 Loading `imagenet_random_s1` prints a warning that some policy-head parameters are missing or have another shape.
-This is expected: the random-location models never use their policy head, and this one was saved with a smaller
-head than the config builds. It does not affect any result.
+The random-location models never use their policy head, and this one was saved with a smaller head than the config
+builds, so the warning does not affect any result.
 
 ## Evaluating a model
 
-A model is evaluated with `main.py --just_evaluate true`, the config it was trained with and its checkpoint:
+To evaluate a model, run `main.py --just_evaluate true` with the config it was trained with and its checkpoint:
 
 ```bash
 python main.py --config_path configs/paper/ade20k_learned.yaml --data_dir <data_dir> --just_evaluate true \
     --pretrained_model_path checkpoints/ade20k_learned_s1.pth
 ```
 
-The validation metrics (accuracy for classification; mIoU and pixel accuracy for segmentation) are printed at the
-end of the log. For a model you trained yourself, use the `config.yaml` and a checkpoint from its run directory
+The end of the log shows the validation metrics: accuracy for classification, mIoU and pixel accuracy for
+segmentation. For a model you trained yourself, use the `config.yaml` and a checkpoint from its run directory
 (see the [training guide](training.md)).
 
-The evaluation can be varied on the command line:
+These options change the evaluation:
 
 | Option | Effect |
 |---|---|
@@ -68,20 +68,20 @@ bash reproduce/table3.sh
 python reproduce/aggregate.py                # prints both tables and compares them with the paper's values
 ```
 
-`aggregate.py` checks every value against `reproduce/expected.csv`, the values of the released models.
-Deterministic policies (the learned policy, fixed sequences, map heuristics) match up to GPU non-determinism
-(tolerance 0.05); random-location evaluations draw new fixations every time (tolerance 0.5). The paper reports the
+`aggregate.py` checks every value against `reproduce/expected.csv`, which holds the values of the released models.
+Deterministic policies (the learned policy, the fixed sequences and the map heuristics) match up to GPU
+non-determinism, within 0.05. Random-location evaluations draw new fixations every time, so they match within 0.5. The paper reports the
 mean and standard deviation over three seeds. If you trained the other seeds yourself, put them next to the
 released ones as `<dataset>_<policy>_s<seed>.pth` and run the scripts with `SEEDS="1 2 3"`.
 
 Each table entry is one evaluation run on one GPU. Logs go to `reproduce_out/logs/` and results to
-`reproduce_out/cells.csv`. Finished entries are skipped when a script is rerun, so an interrupted run continues where
-it stopped, and separate datasets can run in parallel. The scripts read the environment variables `CKPT_DIR`
+`reproduce_out/cells.csv`. A rerun skips finished entries, so an interrupted run continues where it stopped, and you
+can run separate datasets in parallel. The scripts read the environment variables `CKPT_DIR`
 (default `./checkpoints`), `DATA_DIR` (default `./data`), `OUT` (default `./reproduce_out`), `BS` (default 8) and
 `SEEDS` (default 1).
 
-The passive baselines in the first row of the paper's main table have no released weights; to reproduce them,
-train them with the configs `*_passive` (see the [training guide](training.md)).
+We do not release weights for the passive baselines in the first row of the paper's main table. To reproduce them,
+train them with the `*_passive` configs (see the [training guide](training.md)).
 
 ## Recording and replaying fixations
 
@@ -99,6 +99,6 @@ import pyarrow.parquet as pq
 table = pq.read_table("scanpaths/imagenet_learned/scanpaths.parquet").to_pydict()   # image_path, epoch, locations
 ```
 
-A recorded file can be replayed into any model with `--replay_scanpaths <file>`: the model then looks at the recorded
-locations instead of choosing its own. This is how `table3.sh` transfers a learned policy to another model. Images
-are matched by their class folder and file name, so the data root may differ between recording and replay.
+With `--replay_scanpaths <file>`, any model looks at the recorded locations instead of choosing its own. `table3.sh`
+uses this to transfer a learned policy to another model. Images are matched by class folder and file name, so the
+data root can differ between recording and replay.

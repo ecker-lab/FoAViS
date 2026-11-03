@@ -1,7 +1,7 @@
 # Training
 
-This guide covers training FoAViS models: the models of the paper, or your own variants of them. Set up the
-environment and the data first, as described in the [README](../README.md).
+How to train the paper's FoAViS models or your own variants of them. Set up the environment and the data first, as
+described in the [README](../README.md).
 
 - [Running a training](#running-a-training)
 - [The paper's models](#the-papers-models)
@@ -12,9 +12,9 @@ environment and the data first, as described in the [README](../README.md).
 
 ## Running a training
 
-Every model of the paper has a config in `configs/paper/`. Its header gives the exact command, the hardware of the
-reported runs and their seeds; its body lists only what differs from `configs/config_default.yaml`, which documents
-every option. A training is started with
+Every model of the paper has a config in `configs/paper/`. The header of each config gives the exact command, the
+hardware of the reported runs and their seeds. The body lists only what differs from `configs/config_default.yaml`,
+which documents every option. Start a training with
 
 ```bash
 python main.py --config_path configs/paper/<model>.yaml --data_dir <data_dir> --seed <seed>     # one GPU
@@ -25,9 +25,9 @@ torchrun --nproc_per_node 4 main.py --config_path configs/paper/<model>.yaml ...
 below, e.g. ImageNet on 2 GPUs with `--batch_size 32`.
 
 Any config option can be overridden on the command line by its name (`--num_glimpses 6`) or, where the name occurs in
-several sections, by its path (`--memory.channels 64`). Each run writes its config, checkpoints and the link
-`last.pth` (to the latest checkpoint) to `model_ckpts/<dataset>/<timestamp>_<id>/`. Metrics are printed to the
-console; add `--use_wandb true` to also log them to Weights & Biases.
+several sections, by its path (`--memory.channels 64`). Each run writes its config, its checkpoints and a link
+`last.pth` to the latest checkpoint into `model_ckpts/<dataset>/<timestamp>_<id>/`. Metrics go to the console; add
+`--use_wandb true` to also log them to Weights & Biases.
 
 ## The paper's models
 
@@ -41,20 +41,20 @@ console; add `--use_wandb true` to also log them to Weights & Biases.
 | `cmnist_passive`, `imagenet_passive` | scratch | 400, 150 | 1 x 64, 4 x 16 | |
 | `ade20k_passive`, `coco_stuff_passive` | `imagenet_passive` | 500, 72 | 1 x 16 | |
 
-`random` models are trained with random fixation locations, `learned` models with their own fixation policy, and
-`passive` models are the baselines without foveation. Training is not bit-reproducible on GPUs, so a retrained model
+`random` models were trained with random fixation locations, `learned` models with their own fixation policy, and
+the `passive` models are the baselines without foveation. Training is not bit-reproducible on GPUs, so a retrained model
 matches the reported one up to seed variation.
 
 ## Training from scratch
 
-The C-MNIST models and the passive C-MNIST and ImageNet baselines are trained from scratch in one run:
+The C-MNIST models and the passive C-MNIST and ImageNet baselines train from scratch in one run:
 
 ```bash
 python main.py --config_path configs/paper/cmnist_learned.yaml --data_dir <data_dir> --seed <seed>
 ```
 
-The ImageNet models are trained in two phases of 75 epochs: phase 1 at a constant learning rate, phase 2 continuing
-from the end of phase 1 with a decaying learning rate (and the optimizer state of phase 1):
+The ImageNet models train in two phases of 75 epochs. Phase 1 uses a constant learning rate. Phase 2 continues from
+the end of phase 1, with its optimizer state, and decays the learning rate:
 
 ```bash
 torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned_phase1.yaml --data_dir <data_dir> --seed <seed>
@@ -64,8 +64,8 @@ torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned
 
 ## Starting from a pre-trained model
 
-The segmentation models (ADE20K, COCO-Stuff) start from the ImageNet model trained with random locations, both the
-`random` and the `learned` ones. You can use the released one instead of training it yourself:
+Both the `random` and the `learned` segmentation models (ADE20K, COCO-Stuff) start from the ImageNet model trained
+with random locations. You can use the released one instead of training it yourself:
 
 ```bash
 python -m foavis.io.download --models imagenet_random_s1
@@ -73,9 +73,9 @@ python main.py --config_path configs/paper/ade20k_learned.yaml --data_dir <data_
     --pretrained_model_path checkpoints/imagenet_random_s1.pth
 ```
 
-The passive segmentation baselines start in the same way from a trained `imagenet_passive` model. In general,
-`--pretrained_model_path` initializes a model from any checkpoint; weights whose shape does not fit (e.g. a task head
-for another number of classes) are skipped and listed in the log.
+The passive segmentation baselines start in the same way from a trained `imagenet_passive` model. More generally,
+`--pretrained_model_path` initializes a model from any checkpoint. Weights whose shape does not fit, such as a task
+head for another number of classes, are skipped and listed in the log.
 
 ## Resuming an interrupted run
 
