@@ -23,7 +23,8 @@ y_t       = classification_head(H_t) | segmentation_head(H_t)
 | `foavis/core/trainer.py` | training epochs, evaluation passes, metrics, checkpoints, scanpath recording and replay |
 | `foavis/core/losses.py` | task loss on every step, reward, reward standardization, policy loss (paper Eq. 5-9) |
 | `foavis/data/` | datasets (`cmnist.py`, `imagenet.py`, `segmentation.py`), `transforms.py`, `loaders.py` |
-| `foavis/io/` | `checkpoint.py`, `scanpaths.py` (Parquet), `logger.py` |
+| `foavis/io/` | `checkpoint.py`, `scanpaths.py` (Parquet), `download.py` (released checkpoints), `logger.py` |
+| `foavis/predict.py` | single-image inference for the released models (used by `demo.ipynb`) |
 | `foavis/utils/parser.py` | config loading and command-line flags |
 | `configs/config_default.yaml` | every config key and its default; `configs/paper/*.yaml` only override it |
 | `reproduce/` | Tables 2 and 3: `table2.sh`, `table3.sh` (via `common.sh`) -> `cells.csv` -> `aggregate.py` |

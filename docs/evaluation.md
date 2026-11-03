@@ -27,6 +27,10 @@ python -m foavis.io.download --models imagenet_learned_s1        # a subset
 Each file is checked against its MD5 after the download. The scripts in `reproduce/` download any missing
 checkpoint by themselves.
 
+Loading `imagenet_random_s1` prints a warning that some policy-head parameters are missing or have another shape.
+This is expected: the random-location models never use their policy head, and this one was saved with a smaller
+head than the config builds. It does not affect any result.
+
 ## Evaluating a model
 
 A model is evaluated with `main.py --just_evaluate true`, the config it was trained with and its checkpoint:

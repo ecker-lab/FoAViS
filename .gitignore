@@ -9,3 +9,5 @@ CLAUDE.md
 .claude/
 /checkpoints/
 /reproduce_out/
+*_foavis.png
+.ipynb_checkpoints/

@@ -16,6 +16,8 @@ dependencies:
   - pyyaml
   - pillow=10.4
   - tqdm
+  - matplotlib      # foavis.predict figures and demo.ipynb
+  - ipykernel       # demo.ipynb
   - pytest
   - pip
   - pip:

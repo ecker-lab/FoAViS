@@ -29,12 +29,15 @@ main.py                  entry point: training and evaluation (--just_evaluate)
 foavis/model/            foavis.py (the glimpse loop), foveation.py, backbone.py, memory.py, heads.py, policy.py,
                          passive.py (the passive baselines)
 foavis/core/             losses.py (objective), trainer.py (training and evaluation loop)
-foavis/data/             cmnist.py, imagenet.py, segmentation.py (ADE20K, COCO-Stuff), transforms.py, loaders.py
+foavis/data/             cmnist.py, imagenet.py, segmentation.py (ADE20K, COCO-Stuff), transforms.py, loaders.py,
+                         class_names.py
 foavis/io/               checkpoint.py, scanpaths.py (recorded fixations), download.py (pre-trained models), logger.py
+foavis/predict.py        a model on single images: prediction, fixations and figure (docs/inference.md)
 foavis/utils/            parser.py (config and command-line options), config.py, distributed.py
 configs/                 config_default.yaml (every option, commented) and configs/paper/ (one per model)
 reproduce/               scripts for the paper's main results (see the evaluation guide)
 tests/                   unit tests and a short training test
+demo.ipynb               demo notebook (Colab); docs/examples/ holds its images
 ```
 
 Fixation locations are in normalized image coordinates throughout: `(-1, -1)` is the top left and `(1, 1)` the
@@ -47,7 +50,7 @@ DATA_DIR=<data_dir> python -m pytest tests/
 ```
 
 The training test runs one short epoch per model type on a GPU (C-MNIST with learned and random locations, and
-ADE20K if it is present under `DATA_DIR`); the other tests run on the CPU in seconds.
+ADE20K if it is present under `DATA_DIR`); the other tests run on the CPU in seconds. Tests that download checkpoints run only with `FOAVIS_TEST_DOWNLOAD=1`.
 
 If you work on the code with an AI coding assistant, `AGENTS.md` summarizes the structure, the invariants and how to
 check a change.
