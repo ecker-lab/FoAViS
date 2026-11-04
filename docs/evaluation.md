@@ -1,6 +1,6 @@
 # Evaluation
 
-How to evaluate a FoAViS model on a validation set, whether one of our pre-trained models or one you trained
+This guide shows how to evaluate a FoAViS model on a validation set, whether one of our pre-trained models or one you trained
 yourself, how to reproduce the paper's main results, and how to record the fixations a model makes. Set up the
 environment and the data first, as described in the [README](../README.md).
 
@@ -24,12 +24,9 @@ python -m foavis.io.download                                     # all
 python -m foavis.io.download --models imagenet_learned_s1        # a subset
 ```
 
-The download checks each file against its MD5. The scripts in `reproduce/` download missing checkpoints by
-themselves.
-
-Loading `imagenet_random_s1` prints a warning that some policy-head parameters are missing or have another shape.
-The random-location models never use their policy head, and this one was saved with a smaller head than the config
-builds, so the warning does not affect any result.
+The scripts in `reproduce/` download missing checkpoints by
+themselves. Loading `imagenet_random_s1` prints a warning that some policy-head parameters are missing or have another shape.
+You can ignore it, since the random-location models are trained without a policy head.
 
 ## Evaluating a model
 
@@ -41,8 +38,8 @@ python main.py --config_path configs/paper/ade20k_learned.yaml --data_dir <data_
 ```
 
 The end of the log shows the validation metrics: accuracy for classification, mIoU and pixel accuracy for
-segmentation. For a model you trained yourself, use the `config.yaml` and a checkpoint from its run directory
-(see the [training guide](training.md)).
+segmentation. For a model you trained yourself, use the `config.yaml` saved in its run directory (without its `folder_name`
+line, which is not a config option) and a checkpoint from the same directory (see the [training guide](training.md)).
 
 These options change the evaluation:
 
@@ -65,7 +62,7 @@ The scripts in `reproduce/` evaluate every model of the paper's two main results
 ```bash
 bash reproduce/table2.sh                     # all datasets, or e.g. `bash reproduce/table2.sh cmnist imagenet`
 bash reproduce/table3.sh
-python reproduce/aggregate.py                # prints both tables and compares them with the paper's values
+python reproduce/aggregate.py                # prints both tables and checks them against expected.csv
 ```
 
 `aggregate.py` checks every value against `reproduce/expected.csv`, which holds the values of the released models.
@@ -80,8 +77,8 @@ can run separate datasets in parallel. The scripts read the environment variable
 (default `./checkpoints`), `DATA_DIR` (default `./data`), `OUT` (default `./reproduce_out`), `BS` (default 8) and
 `SEEDS` (default 1).
 
-We do not release weights for the passive baselines in the first row of the paper's main table. To reproduce them,
-train them with the `*_passive` configs (see the [training guide](training.md)).
+The passive baselines in the first row of the paper's main table can be trained with the `*_passive` configs (see the
+[training guide](training.md)).
 
 ## Recording and replaying fixations
 

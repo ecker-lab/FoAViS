@@ -1,6 +1,6 @@
 # Training
 
-How to train the paper's FoAViS models or your own variants of them. Set up the environment and the data first, as
+This guide shows how to train the paper's FoAViS models or your own variants of them. Set up the environment and the data first, as
 described in the [README](../README.md).
 
 - [Running a training](#running-a-training)

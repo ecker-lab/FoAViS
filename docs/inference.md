@@ -1,6 +1,6 @@
 # Inference
 
-How to run a pre-trained FoAViS model on single images, such as your own photos, and see where it fixates. To
+This guide shows how to run a pre-trained FoAViS model on single images, such as your own photos, and see where it fixates. To
 evaluate a model on a whole validation set, see the [evaluation guide](evaluation.md). The
 [demo notebook](../demo.ipynb) runs everything below on example images and works on Google Colab.
 
@@ -28,21 +28,26 @@ only work on C-MNIST images (see below).
 
 ## Python
 
+Inference can also be done in Python. `load_model` loads a pre-trained model and downloads its checkpoint if needed,
+`predict` runs it on an image, and `show` draws the figure described above:
+
 ```python
 from foavis.predict import load_model, predict, show
 
-model = load_model("ade20k_learned_s1")            # also: num_glimpses=8, policy="random", device="cpu"
-result = predict(model, "my_photo.jpg")            # a path, a PIL image or a preprocessed tensor
-result.fixations                                   # (T, 2), the first at the image centre
-result.classes_present()                           # segmentation: [(class, fraction of pixels), ...]
-result.top(5)                                      # classification: [(class, probability), ...]
+model = load_model("ade20k_learned_s1")
+result = predict(model, "my_photo.jpg")   # a path, a PIL image or a preprocessed tensor
+print(result.fixations)                   # (T, 2): one (x, y) per glimpse, the first at the image centre
+print(result.classes_present())           # [(class, fraction of pixels), ...]
 show(result, "figure.png")
 ```
 
-`policy` takes any of the evaluation policies: `learned`, `random`, `triangle`, `quadrant`, `saliency`
-(classification) and `entropy` (segmentation). The result also holds the per-glimpse predictions (`result.steps`),
-which show how the prediction changes as the model sees more of the image, and the policy logits after each glimpse
-(`result.policy_logits`).
+For a classification model such as `imagenet_learned_s1`, `result.top(5)` gives the five most likely classes and
+their probabilities instead. `result.steps` holds the prediction after each glimpse, which shows how it changes as the
+model sees more of the image, and `result.policy_logits` holds the policy logits after each glimpse.
+
+`load_model` also takes `num_glimpses` (the models were trained with 4), `device` and `policy`. `policy` sets how the
+model chooses its fixations. It takes any of the policies from the paper's evaluation: `learned`, `random`, the fixed
+sequences `triangle` and `quadrant`, or the heuristics `saliency` (classification) and `entropy` (segmentation).
 
 The image is preprocessed as in the paper's evaluation. For ImageNet it is resized to 256 pixels and centre-cropped
 to 224, and for the segmentation models it is resized to 512 x 512. Fixations are in normalized coordinates of that model input,
