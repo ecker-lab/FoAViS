@@ -47,7 +47,7 @@ conda activate foavis
 pip install -e .
 ```
 
-The environment uses Python 3.11 and PyTorch 2.3.0 with CUDA 12.1, so your NVIDIA driver must support CUDA 12.1. Other Python and PyTorch versions may work as well but have not been tested. The code was tested on Linux.
+The environment uses Python 3.11 and PyTorch 2.3.0 with CUDA 12.1, so your NVIDIA driver must support CUDA 12.1. Other Python and PyTorch versions may work as well but have not been tested. The code was tested on Linux. Run all commands from the repository root.
 
 ## Data
 
@@ -60,8 +60,9 @@ first time they are used.
 You have to download the other datasets yourself from their official sources and arrange them as shown below:
 [ImageNet](https://image-net.org/download.php) (ILSVRC 2012), [ADE20K](http://sceneparsing.csail.mit.edu/)
 (ADEChallengeData2016), the [COCO 2017](https://cocodataset.org/#download) images and the
-[COCO-Stuff 164k](https://github.com/nightrome/cocostuff) label maps (stuffthingmaps). You only need the datasets you
-want to use.
+[COCO-Stuff 164k](https://github.com/nightrome/cocostuff) label maps (stuffthingmaps).
+ImageNet's validation images need to be sorted into one folder per class (WordNet ID, as
+for the training images) using the labels of the ILSVRC 2012 development kit.
 
 ```
 <data_dir>/
