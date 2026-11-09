@@ -27,6 +27,7 @@ ckpt () { echo "$CKPT_DIR/$1_$2_s$3.pth"; } # $1=dataset $2=arm $3=seed
 # Downloads a missing released checkpoint (seed 1) from GRO.data, see foavis/io/download.py.
 need_ckpt () { # $1=dataset $2=arm $3=seed
   [ -f "$(ckpt "$1" "$2" "$3")" ] && return
+  echo "fetch $1_$2_s$3: not in $CKPT_DIR, downloading the released checkpoint"
   python -m foavis.io.download --root "$CKPT_DIR" --models "$1_$2_s$3" > /dev/null 2>&1 \
     || { echo "FAIL  no checkpoint $(ckpt "$1" "$2" "$3") (only seed 1 is released)"; return 1; }
 }

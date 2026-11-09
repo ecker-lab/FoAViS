@@ -43,9 +43,18 @@ def test_check_flags_only_cells_outside_tolerance(tmp_path):
     head = 'dataset,arm,seed,policy,T,metric,pxacc\n'
     exp.write_text(head + 'ade20k,learned,1,learned,4,24.00,70.0\nade20k,random,1,random,4,21.0,68.0\n'
                    'imagenet,learned,1,learned,4,68.0,\n')
-    ours.write_text(head + 'ade20k,learned,1,learned,4,24.10,70.0\n'   # deterministic, off by 0.1 -> flagged
+    ours.write_text(head + 'ade20k,learned,1,learned,4,24.20,70.0\n'   # deterministic, off by 0.2 -> flagged
                     'ade20k,random,1,random,4,21.3,68.2\n'             # sampled, within 0.5 -> ok
                     'imagenet,learned,1,learned,4,68.0,\n')
     report = aggregate.check(ours, exp)
     assert report[0].endswith('5 values compared, 1 outside tolerance')
-    assert len(report) == 2 and 'ade20k,learned,1,learned,4 metric' in report[1]
+    assert len(report) == 3 and 'ade20k,learned,1,learned,4 metric' in report[2]
+
+
+def test_check_counts_missing_values_per_dataset(tmp_path):
+    ours, exp = tmp_path / 'cells.csv', tmp_path / 'expected.csv'
+    head = 'dataset,arm,seed,policy,T,metric,pxacc\n'
+    exp.write_text(head + 'ade20k,learned,1,learned,4,24.0,70.0\nade20k,random,1,random,4,21.0,68.0\n'
+                   'imagenet,learned,1,learned,4,68.0,\n')
+    ours.write_text(head + 'ade20k,learned,1,learned,4,24.0,70.0\n')   # one ade20k cell, no imagenet cell
+    assert aggregate.check(ours, exp)[1] == 'Missing from cells.csv: ade20k 2 of 4, imagenet 1 of 1 (not run)'

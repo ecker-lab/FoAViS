@@ -14,8 +14,9 @@ from collections import defaultdict
 
 EXPECTED = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'expected.csv')
 # allowed |difference| to expected.csv: random-location cells draw new fixations at every evaluation,
-# all other policies are deterministic and differ only by GPU non-determinism
-TOLERANCE = {'sampled': 0.5, 'deterministic': 0.05}
+# all other policies are deterministic and differ only by the GPU kernels that torch.compile picks in each job
+# (up to ~0.1 seen)
+TOLERANCE = {'sampled': 0.5, 'deterministic': 0.15}
 
 # (dataset, metric column) per table column
 COLUMNS = {
@@ -68,7 +69,16 @@ def check(path, expected_path=EXPECTED):
                 if abs(d) > TOLERANCE[kind]:
                     bad.append(f'  {",".join(key)} {k}: {v:.3f} vs expected {exp[key][k]:.3f} ({d:+.3f}, {kind})')
     head = f'Check against {os.path.basename(expected_path)}: {n} values compared, {len(bad)} outside tolerance'
-    return [head] + bad
+    # expected values without an evaluated cell, per dataset, so that a run that died early does not read as a pass
+    missing, total = defaultdict(int), defaultdict(int)
+    for key, vals in exp.items():
+        for k in vals:
+            total[key[0]] += 1
+            missing[key[0]] += k not in ours.get(key, {})
+    run = {key[0] for key in ours}
+    miss = 'Missing from cells.csv: ' + ', '.join(
+        f'{ds} {missing[ds]} of {total[ds]}' + ('' if ds in run else ' (not run)') for ds in sorted(total))
+    return [head, miss] + bad
 
 
 def fmt(values):

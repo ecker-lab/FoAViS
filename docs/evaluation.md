@@ -25,7 +25,11 @@ python -m foavis.io.download --models imagenet_learned_s1        # a subset
 ```
 
 The scripts in `reproduce/` download missing checkpoints by
-themselves. Loading `imagenet_random_s1` prints a warning that some policy-head parameters are missing or have another shape.
+themselves. If their checkpoint folder (`CKPT_DIR`, default `./checkpoints`) holds your own models, any
+missing one is filled with ours. To evaluate only your own models, make sure the folder holds every model the
+tables need.
+
+Loading `imagenet_random_s1` prints a warning that some policy-head parameters are missing or have another shape.
 You can ignore it, since the random-location models are trained without a policy head.
 
 ## Evaluating a model
@@ -66,10 +70,16 @@ python reproduce/aggregate.py                # prints both tables and checks the
 ```
 
 `aggregate.py` checks every value against `reproduce/expected.csv`, which holds the values of the released models.
-Deterministic policies (the learned policy, the fixed sequences and the map heuristics) match up to GPU
-non-determinism, within 0.05. Random-location evaluations draw new fixations every time, so they match within 0.5. The paper reports the
-mean and standard deviation over three seeds. If you trained the other seeds yourself, put them next to the
-released ones as `<dataset>_<policy>_s<seed>.pth` and run the scripts with `SEEDS="1 2 3"`.
+Deterministic policies (the learned policy, the fixed sequences and the map heuristics) match within 0.15. They
+differ at all because `torch.compile` times several GPU kernels at the start of each job and keeps the fastest, and
+different kernels round differently, so a value can move by up to about 0.1 from one job to the next. With
+`--use_compile false`, repeated runs give the same value, though not necessarily the one in `expected.csv`, which was
+computed with compilation. Random-location evaluations draw new fixations every time, so they match within 0.5.
+These tolerances hold only for the released checkpoints. A model you trained yourself differs from them by seed
+variation, so compare it with the paper instead, which reports the mean and standard deviation over three seeds.
+If you trained the other seeds yourself, put them next to the released ones as `<dataset>_<policy>_s<seed>.pth`
+and run the scripts with `SEEDS="1 2 3"`. The tables then show the mean and standard deviation,
+but the check against `expected.csv` covers seed 1 only.
 
 Each table entry is one evaluation run on one GPU. Logs go to `reproduce_out/logs/` and results to
 `reproduce_out/cells.csv`. A rerun skips finished entries, so an interrupted run continues where it stopped, and you
@@ -78,7 +88,8 @@ can run separate datasets in parallel. The scripts read the environment variable
 `SEEDS` (default 1).
 
 The passive baselines in the first row of the paper's main table can be trained with the `*_passive` configs (see the
-[training guide](training.md)).
+[training guide](training.md)). Evaluate a trained passive model with `main.py` and its `*_passive` config, as described in
+[Evaluating a model](#evaluating-a-model).
 
 ## Recording and replaying fixations
 

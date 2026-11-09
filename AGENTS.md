@@ -61,10 +61,11 @@ python main.py --config_path configs/paper/cmnist_learned.yaml --just_evaluate t
 OUT=/tmp/check bash reproduce/table2.sh cmnist && python reproduce/aggregate.py /tmp/check/cells.csv
 ```
 
-`aggregate.py` compares every evaluated cell with `expected.csv` (tolerance 0.05 for deterministic policies, 0.5
+`aggregate.py` compares every evaluated cell with `expected.csv` (tolerance 0.15 for deterministic policies, 0.5
 for random fixations). Pitfalls when comparing runs:
 
 - The validation loader shuffles, so `--use_test_mode` (at most 100 batches) sees a different subset whenever the
   random-number stream before it changes. Compare full validation passes.
-- GPU kernels are not deterministic: identical code can differ by ~0.01 in a metric.
+- `torch.compile` times candidate GPU kernels once per job and keeps the fastest, so identical code gives identical
+  values within one job but can differ by up to ~0.1 in a metric between jobs. `--use_compile false` removes this.
 - A recorded scanpath file must cover every validation image it is replayed on.
