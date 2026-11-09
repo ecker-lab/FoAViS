@@ -34,6 +34,7 @@ class Trainer:
         self.epoch = 0
         self.warmup_steps = config.training.optimizer.warmup_steps
         self._base_lrs = [pg['lr'] for pg in optimizer.param_groups]
+        self._step_lr = None
         self._last_ckpt_paths = []
 
         replay = config.utils.replay_scanpaths
@@ -49,8 +50,12 @@ class Trainer:
         if self.config.training.just_evaluate:
             self.evaluate()
             return
-        if start_epoch > 0:   # resumed run: no second warm-up
-            self.global_step = self.warmup_steps
+        if start_epoch > 0:   # resumed run: continue the warm-up where it stopped (if it had not ended)
+            steps = len(self.train_loader)
+            if self.config.utils.max_train_steps_per_epoch:
+                steps = min(steps, self.config.utils.max_train_steps_per_epoch)
+            self.global_step = start_epoch * steps
+            self._base_lrs = [self.config.training.optimizer.lr] * len(self.optimizer.param_groups)
         best = float("-inf")   # best.pth tracks the best validation metric of this process
         for epoch in range(start_epoch, self.config.training.num_epochs):
             self.epoch = epoch
@@ -59,11 +64,13 @@ class Trainer:
                     if hasattr(loader.sampler, 'set_epoch'):
                         loader.sampler.set_epoch(epoch)
             metrics = self.run_epoch(self.train_loader, training=True)
-            metrics['train_lr'] = self.scheduler.get_last_lr()[0]
+            metrics['train_lr'] = self._step_lr   # rate of the epoch's last step (includes the warm-up)
             if self.is_main_process:
                 print(f"epoch:{epoch} {datetime.now().strftime('%d-%m %H:%M:%S')} - Training Metrics: {metrics}")
+            self.scheduler.step()   # before saving, so that a resumed run starts with the next epoch's rate
 
-            if (epoch + 1) % self.config.training.validation_interval == 0 or epoch == 0:
+            last = epoch == self.config.training.num_epochs - 1
+            if (epoch + 1) % self.config.training.validation_interval == 0 or epoch == 0 or last:
                 val = self.run_epoch(self.valid_loader, training=False)
                 if self.is_main_process:
                     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Validation Metrics: {val}")
@@ -74,7 +81,6 @@ class Trainer:
                     self._save_last(epoch, value)
                 metrics.update({k: v for k, v in val.items() if not k.endswith("per_class_iou")})
             self.logger.log({**metrics, "epoch": epoch + 1})
-            self.scheduler.step()
         self.logger.close()
 
     def evaluate(self):
@@ -143,6 +149,7 @@ class Trainer:
         clip = self.config.training.clip_grad_norm
         if clip and clip > 0:
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=clip)
+        self._step_lr = self.optimizer.param_groups[0]['lr']
         self.optimizer.step()
         if self.warmup_steps > 0 and self.global_step < self.warmup_steps:   # linear warm-up per step
             for pg, base_lr in zip(self.optimizer.param_groups, self._base_lrs):

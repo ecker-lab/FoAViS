@@ -2,8 +2,12 @@
 
 
 class ConsoleLogger:
+    def __init__(self, enabled=True):   # under torchrun only the main process prints
+        self.enabled = enabled
+
     def log(self, metrics):
-        print(metrics)
+        if self.enabled:
+            print(metrics)
 
     def close(self):
         pass

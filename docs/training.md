@@ -18,32 +18,40 @@ which documents every option. Start a training with
 
 ```bash
 python main.py --config_path configs/paper/<model>.yaml --data_dir <data_dir> --seed <seed>     # one GPU
-torchrun --nproc_per_node 4 main.py --config_path configs/paper/<model>.yaml ...              # four GPUs
+torchrun --standalone --nproc_per_node 4 main.py --config_path configs/paper/<model>.yaml ...   # four GPUs
 ```
 
-`batch_size` is per GPU. With a different number of GPUs, keep the total batch (GPUs x `batch_size`) as in the table
-below, e.g. ImageNet on 2 GPUs with `--batch_size 32`.
+`batch_size` and `num_workers` are per GPU. With a different number of GPUs, keep the total batch (GPUs x
+`batch_size`) as in the table below, e.g. ImageNet on 2 GPUs with `--batch_size 32`. The learned models standardize
+their rewards within each GPU's batch, so a different batch size per GPU might lead to slightly different training
+behavior, unless the standardization is changed to use the total batch across GPUs.
 
 Any config option can be overridden on the command line by its name (`--num_glimpses 6`) or, where the name occurs in
 several sections, by its path (`--memory.channels 64`). Each run writes its config, its checkpoints and a link
-`last.pth` to the latest checkpoint into `model_ckpts/<dataset>/<timestamp>_<id>/`. Metrics go to the console; add
+`last.pth` to the latest checkpoint into `model_ckpts/<dataset>/<timestamp>_<id>/`. Every new best checkpoint is kept,
+so a run folder can grow to several GB (about 6 GB for a segmentation run). Metrics go to the console; add
 `--use_wandb true` to also log them to Weights & Biases.
 
 ## The paper's models
 
-| Config | Starts from | Epochs | GPUs x batch per GPU | Time per run (reported runs) |
-|---|---|---|---|---|
-| `cmnist_random`, `cmnist_learned` | scratch | 400 | 1 x 64 | ~20 h, A100 |
-| `imagenet_*_phase1` | scratch | 75 (constant learning rate) | 4 x 16 | ~35 h, 4x A100 or H100 |
-| `imagenet_*_phase2` | phase 1 of the same model | 75 (step decay) | 4 x 16 | ~35 h, 4x A100 or H100 |
-| `ade20k_random`, `ade20k_learned` | ImageNet random-location model | 500 | 1 x 16 | 44-50 h, H100 |
-| `coco_stuff_random`, `coco_stuff_learned` | ImageNet random-location model | 72 | 1 x 16 | 43-49 h, H100 |
-| `cmnist_passive`, `imagenet_passive` | scratch | 400, 150 | 1 x 64, 4 x 16 | |
-| `ade20k_passive`, `coco_stuff_passive` | `imagenet_passive` | 500, 72 | 1 x 16 | |
+| Config | Starts from | Epochs | GPUs x batch per GPU | Memory per GPU | Time per run |
+|---|---|---|---|---|---|
+| `cmnist_random`, `cmnist_learned` | scratch | 400 | 1 x 64 | ~11 GB | ~20 h, A100 |
+| `imagenet_*_phase1` | scratch | 75 (constant learning rate) | 4 x 16 | ~5 GB | ~35 h, 4x A100 or H100 |
+| `imagenet_*_phase2` | phase 1 of the same model | 75 (step decay) | 4 x 16 | ~5 GB | ~35 h, 4x A100 or H100 |
+| `ade20k_random`, `ade20k_learned` | ImageNet random-location model | 500 | 1 x 16 | > 40 GB (~51 GB learned) | 44-50 h, H100 |
+| `coco_stuff_random`, `coco_stuff_learned` | ImageNet random-location model | 72 | 1 x 16 | > 40 GB | 43-49 h, H100 |
+| `cmnist_passive`, `imagenet_passive` | scratch | 400, 150 | 1 x 64, 4 x 16 | ~10 GB, < 40 GB | ~9 h, A100; ~35 h, 4x A100 |
+| `ade20k_passive`, `coco_stuff_passive` | `imagenet_passive` | 500, 72 | 1 x 16 | < 40 GB | ~20 h, ~19 h, A100 |
 
 `random` models were trained with random fixation locations, `learned` models with their own fixation policy, and
 the `passive` models are the baselines without foveation. Training is not bit-reproducible on GPUs, so a retrained model
 matches the reported one up to seed variation.
+
+The times are from runs on the hardware available at that time. On an 80 GB A100, for example, the
+segmentation models with foveation took about 1.5 times as long as on the H100s listed.
+Memory per GPU was read from `nvidia-smi` while training on A100s with the listed batch size. "> 40 GB" means that the
+run did not fit on a 40 GB A100, so the segmentation models with foveation need an 80 GB GPU at batch 16.
 
 ## Training from scratch
 
@@ -57,8 +65,8 @@ The ImageNet models train in two phases of 75 epochs. Phase 1 uses a constant le
 the end of phase 1, with its optimizer state, and decays the learning rate:
 
 ```bash
-torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned_phase1.yaml --data_dir <data_dir> --seed <seed>
-torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned_phase2.yaml --data_dir <data_dir> --seed <seed> \
+torchrun --standalone --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned_phase1.yaml --data_dir <data_dir> --seed <seed>
+torchrun --standalone --nproc_per_node 4 main.py --config_path configs/paper/imagenet_learned_phase2.yaml --data_dir <data_dir> --seed <seed> \
     --pretrained_model_path model_ckpts/imagenet/<phase-1 run>/last.pth
 ```
 
@@ -85,7 +93,8 @@ Rerun the same command with
 --pretrained_model_path model_ckpts/<dataset>/<run>/last.pth --resume_training true
 ```
 
-This restores the optimizer, the learning-rate schedule and the epoch, and continues the run.
+This restores the optimizer, the learning-rate schedule and the epoch, and continues training in a new run folder.
+Its `best.pth` covers only the epochs after the resume.
 
 ## Additional models of the appendix
 

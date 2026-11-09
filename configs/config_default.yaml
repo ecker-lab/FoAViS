@@ -45,7 +45,7 @@ training:
   just_evaluate: false                 # evaluate pretrained_model_path on the validation set, no training
   eval_passes: 1                       # evaluation: passes over the validation set, the last one is reported
   num_epochs: 500
-  validation_interval: 2               # validate (and save checkpoints) every this many epochs
+  validation_interval: 2               # validate (and save checkpoints) every this many epochs, and after the first and last
   pretrained_model_path: null          # checkpoint to initialise the model from (weights only)
   restore_optimizer: false             # with pretrained_model_path: also load its optimizer state (ImageNet phase 2)
   resume_training: false               # with pretrained_model_path: continue that run (optimizer, schedule, epoch)
@@ -58,7 +58,7 @@ training:
     eps: 0.00000001                    # AdamW epsilon
     flat_epochs: 23                    # epochs at the full learning rate
     step_size_epochs: 15               # then the learning rate is halved every this many epochs
-    warmup_steps: 2000                 # linear warm-up over this many steps (not when resuming)
+    warmup_steps: 2000                 # linear warm-up over this many steps
   clip_grad_norm: 20.0                 # clip the gradient norm to this value; <= 0 disables
   use_compile: true                    # torch.compile the backbone and the memory module (faster after a few minutes)
   use_amp: true                        # classification: bf16 autocast on GPUs that support it (segmentation: fp32)

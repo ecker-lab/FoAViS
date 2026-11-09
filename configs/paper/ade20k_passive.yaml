@@ -4,7 +4,7 @@
 # Paper: Table 2 (passive baseline), ADE20K; Appendix "Passive baseline".
 # Hardware of the reported run: 1 GPU, batch 16.
 #   python main.py ...                 single GPU
-#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+#   torchrun --standalone --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
 # Command:
 #   python main.py --config_path configs/paper/ade20k_passive.yaml --data_dir <data_dir> --seed <seed> \
 #       --pretrained_model_path model_ckpts/imagenet/<imagenet_passive run>/last.pth

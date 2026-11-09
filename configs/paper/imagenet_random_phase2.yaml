@@ -3,9 +3,9 @@
 # segmentation models.
 # Hardware of the reported runs: 4 GPUs, batch 16 per GPU (64 in total).
 #   python main.py ...                 single GPU
-#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+#   torchrun --standalone --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
 # Command:
-#   torchrun --nproc_per_node 4 main.py --config_path configs/paper/imagenet_random_phase2.yaml --data_dir <data_dir> \
+#   torchrun --standalone --nproc_per_node 4 main.py --config_path configs/paper/imagenet_random_phase2.yaml --data_dir <data_dir> \
 #       --seed <seed> --pretrained_model_path model_ckpts/imagenet/<phase-1 run>/last.pth
 # Seeds of the three reported runs: 1566662013, 1574030505, 985256305
 

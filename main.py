@@ -1,7 +1,7 @@
 """Train or evaluate FoAViS.
 
     python main.py --config_path configs/paper/<model>.yaml --data_dir <data_dir> [--key value ...]
-    torchrun --nproc_per_node N main.py ...          (batch_size is per GPU)
+    torchrun --standalone --nproc_per_node N main.py ...          (batch_size is per GPU)
     python main.py --config_path ... --just_evaluate true --pretrained_model_path <ckpt>
 """
 import random
@@ -106,7 +106,7 @@ def main():
         wandb.define_metric("*", step_metric="epoch")
         logger = WandbLogger(wandb.run)
     else:
-        logger = ConsoleLogger()
+        logger = ConsoleLogger(enabled=main_process)
     ckpt = CheckpointManager(root="./model_ckpts", dataset=config.training.dataset_name, run_name=config.folder_name,
                              config=None if config.training.just_evaluate else config) if main_process else None
     try:

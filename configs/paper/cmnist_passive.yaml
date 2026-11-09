@@ -3,7 +3,7 @@
 # Paper: Table 2 (passive baseline), C-MNIST; Appendix "Passive baseline".
 # Hardware of the reported run: 1 GPU, batch 64.
 #   python main.py ...                 single GPU
-#   torchrun --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
+#   torchrun --standalone --nproc_per_node N main.py ...   N GPUs; dataloader.batch_size is PER GPU, keep N x batch_size equal
 # Command:
 #   python main.py --config_path configs/paper/cmnist_passive.yaml --data_dir <data_dir> --seed <seed>
 # Single reported run. Differs from the active models in AdamW beta1 (0.9) and no gradient clipping.
